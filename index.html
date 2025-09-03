@@ -1,0 +1,2308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão de Estoque Agrícola</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #4a7c59;
+            --secondary-green: #6b8e23;
+            --light-green: #8fbc8f;
+            --earth-brown: #8b4513;
+            --light-brown: #deb887;
+            --cream: #f5f5dc;
+            --soft-beige: #f8f6f0;
+        }
+        
+        body {
+            background-color: var(--soft-beige);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: white !important;
+        }
+        
+        .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            transition: color 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: white !important;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--light-green), var(--secondary-green));
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--secondary-green), var(--primary-green));
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--light-green), var(--primary-green));
+            border: none;
+            border-radius: 25px;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, var(--light-brown), var(--earth-brown));
+            border: none;
+            border-radius: 25px;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            border: none;
+            border-radius: 25px;
+        }
+        
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid var(--light-green);
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 0.2rem rgba(74, 124, 89, 0.25);
+        }
+        
+        .table {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table thead {
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: white;
+        }
+        
+        .sidebar {
+            background: linear-gradient(180deg, var(--cream), var(--soft-beige));
+            min-height: calc(100vh - 76px);
+            border-right: 3px solid var(--light-green);
+        }
+        
+        .sidebar-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+        
+        .sidebar-item:hover {
+            background-color: var(--light-green);
+            color: white;
+            border-left-color: var(--primary-green);
+        }
+        
+        .sidebar-item.active {
+            background-color: var(--primary-green);
+            color: white;
+            border-left-color: var(--secondary-green);
+        }
+        
+        .content-area {
+            padding: 30px;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, white, var(--cream));
+            border-left: 5px solid var(--primary-green);
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: white;
+        }
+        
+        .badge {
+            border-radius: 15px;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .loading {
+            display: none;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-seedling me-2"></i>
+                AgroStock Manager
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showDashboard()">
+                            <i class="fas fa-chart-line me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="refreshData()">
+                            <i class="fas fa-sync-alt me-1"></i> Atualizar
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar">
+                <div class="sidebar-item active" onclick="showDashboard()">
+                    <i class="fas fa-chart-pie me-2"></i> Dashboard
+                </div>
+                <div class="sidebar-item" onclick="showSection('insumos')">
+                    <i class="fas fa-flask me-2"></i> Insumos
+                </div>
+                <div class="sidebar-item" onclick="showSection('fornecedores')">
+                    <i class="fas fa-truck me-2"></i> Fornecedores
+                </div>
+                <div class="sidebar-item" onclick="showSection('talhoes')">
+                    <i class="fas fa-map-marked-alt me-2"></i> Talhões
+                </div>
+                <div class="sidebar-item" onclick="showSection('entradas')">
+                    <i class="fas fa-plus-circle me-2"></i> Entradas
+                </div>
+                <div class="sidebar-item" onclick="showSection('saidas')">
+                    <i class="fas fa-minus-circle me-2"></i> Saídas
+                </div>
+                <div class="sidebar-item" onclick="showSection('estoque')">
+                    <i class="fas fa-warehouse me-2"></i> Estoque
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 content-area">
+                <!-- Loading Spinner -->
+                <div id="loading" class="loading text-center">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                </div>
+
+                <!-- Dashboard -->
+                <div id="dashboard" class="fade-in">
+                    <h2 class="mb-4"><i class="fas fa-chart-pie me-2"></i>Dashboard</h2>
+                    
+                    <!-- Container para alertas -->
+                    <div id="alertContainer"></div>
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-flask fa-2x text-success mb-2"></i>
+                                    <h5 class="card-title">Total Insumos</h5>
+                                    <h3 class="text-success" id="totalInsumos">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-truck fa-2x text-primary mb-2"></i>
+                                    <h5 class="card-title">Fornecedores</h5>
+                                    <h3 class="text-primary" id="totalFornecedores">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-map-marked-alt fa-2x text-warning mb-2"></i>
+                                    <h5 class="card-title">Talhões</h5>
+                                    <h3 class="text-warning" id="totalTalhoes">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card stats-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-warehouse fa-2x text-info mb-2"></i>
+                                    <h5 class="card-title">Itens em Estoque</h5>
+                                    <h3 class="text-info" id="totalEstoque">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>Estoque Baixo
+                                </div>
+                                <div class="card-body">
+                                    <div id="estoqueBaixo">Carregando...</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <i class="fas fa-clock me-2"></i>Últimas Movimentações
+                                </div>
+                                <div class="card-body">
+                                    <div id="ultimasMovimentacoes">Carregando...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção Insumos -->
+                 <div id="insumos" class="content-section" style="display: none;">
+                     <div class="d-flex justify-content-between align-items-center mb-4">
+                         <h2><i class="fas fa-flask me-2"></i>Gerenciar Insumos</h2>
+                         <button class="btn btn-primary" onclick="openInsumoModal()"><i class="fas fa-plus me-2"></i>Novo Insumo</button>
+                     </div>
+                     
+                     <div class="card">
+                         <div class="card-body">
+                             <div class="table-responsive">
+                                 <table class="table table-striped" id="insumosTable">
+                                     <thead>
+                                         <tr>
+                                             <th>ID</th>
+                                             <th>Nome</th>
+                                             <th>Categoria</th>
+                                             <th>Unidade</th>
+                                             <th>Estoque Mínimo</th>
+                                             <th>Estoque Atual</th>
+                                             <th>Ações</th>
+                                         </tr>
+                                     </thead>
+                                     <tbody id="insumosTableBody">
+                                         <!-- Dados serão carregados via JavaScript -->
+                                     </tbody>
+                                 </table>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+                  
+                  <!-- Seção Fornecedores -->
+                  <div id="fornecedores" class="content-section" style="display: none;">
+                      <div class="d-flex justify-content-between align-items-center mb-4">
+                          <h2><i class="fas fa-truck me-2"></i>Gerenciar Fornecedores</h2>
+                          <button class="btn btn-primary" onclick="openFornecedorModal()"><i class="fas fa-plus me-2"></i>Novo Fornecedor</button>
+                      </div>
+                      
+                      <div class="card">
+                          <div class="card-body">
+                              <div class="table-responsive">
+                                  <table class="table table-striped" id="fornecedoresTable">
+                                      <thead>
+                                          <tr>
+                                              <th>ID</th>
+                                              <th>Nome</th>
+                                              <th>Contato</th>
+                                              <th>Email</th>
+                                              <th>Endereço</th>
+                                              <th>Ações</th>
+                                          </tr>
+                                      </thead>
+                                      <tbody id="fornecedoresTableBody">
+                                          <!-- Dados serão carregados via JavaScript -->
+                                      </tbody>
+                                  </table>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                  
+                  <!-- Seções dinâmicas serão carregadas aqui -->
+                  <div id="dynamicContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Insumo -->
+    <div class="modal fade" id="insumoModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="insumoModalTitle">Novo Insumo</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="insumoForm">
+              <input type="hidden" id="insumoId">
+              <div class="mb-3">
+                <label for="insumoNome" class="form-label">Nome *</label>
+                <input type="text" class="form-control" id="insumoNome" required>
+              </div>
+              <div class="mb-3">
+                <label for="insumoCategoria" class="form-label">Categoria *</label>
+                <select class="form-control" id="insumoCategoria" required>
+                  <option value="">Selecione uma categoria</option>
+                  <option value="Fertilizante">Fertilizante</option>
+                  <option value="Defensivo">Defensivo</option>
+                  <option value="Semente">Semente</option>
+                  <option value="Adubo">Adubo</option>
+                  <option value="Herbicida">Herbicida</option>
+                  <option value="Inseticida">Inseticida</option>
+                  <option value="Fungicida">Fungicida</option>
+                  <option value="Outros">Outros</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="insumoUnidade" class="form-label">Unidade *</label>
+                <select class="form-control" id="insumoUnidade" required>
+                  <option value="">Selecione uma unidade</option>
+                  <option value="kg">Quilograma (kg)</option>
+                  <option value="L">Litro (L)</option>
+                  <option value="t">Tonelada (t)</option>
+                  <option value="sc">Saca (sc)</option>
+                  <option value="un">Unidade (un)</option>
+                  <option value="cx">Caixa (cx)</option>
+                  <option value="pct">Pacote (pct)</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="insumoEstoqueMinimo" class="form-label">Estoque Mínimo *</label>
+                <input type="number" class="form-control" id="insumoEstoqueMinimo" min="0" step="0.01" required>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="saveInsumo()">Salvar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Fornecedor -->
+    <div class="modal fade" id="fornecedorModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="fornecedorModalTitle">Novo Fornecedor</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="fornecedorForm">
+              <input type="hidden" id="fornecedorId">
+              <div class="mb-3">
+                <label for="fornecedorNome" class="form-label">Nome *</label>
+                <input type="text" class="form-control" id="fornecedorNome" required>
+              </div>
+              <div class="mb-3">
+                <label for="fornecedorContato" class="form-label">Contato *</label>
+                <input type="text" class="form-control" id="fornecedorContato" placeholder="(00) 00000-0000" required>
+              </div>
+              <div class="mb-3">
+                <label for="fornecedorEmail" class="form-label">Email *</label>
+                <input type="email" class="form-control" id="fornecedorEmail" required>
+              </div>
+              <div class="mb-3">
+                <label for="fornecedorEndereco" class="form-label">Endereço</label>
+                <textarea class="form-control" id="fornecedorEndereco" rows="3" placeholder="Endereço completo (opcional)"></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="saveFornecedor()">Salvar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Talhão -->
+    <div class="modal fade" id="talhaoModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="talhaoModalTitle">Novo Talhão</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="talhaoForm">
+              <input type="hidden" id="talhaoId">
+              <div class="mb-3">
+                <label for="talhaoNome" class="form-label">Nome *</label>
+                <input type="text" class="form-control" id="talhaoNome" placeholder="Ex: Talhão A1" required>
+              </div>
+              <div class="mb-3">
+                <label for="talhaoArea" class="form-label">Área (hectares) *</label>
+                <input type="number" class="form-control" id="talhaoArea" min="0" step="0.01" placeholder="Ex: 10.5" required>
+              </div>
+              <div class="mb-3">
+                <label for="talhaoCultura" class="form-label">Cultura *</label>
+                <select class="form-control" id="talhaoCultura" required>
+                  <option value="">Selecione uma cultura</option>
+                  <option value="Soja">Soja</option>
+                  <option value="Milho">Milho</option>
+                  <option value="Algodão">Algodão</option>
+                  <option value="Feijão">Feijão</option>
+                  <option value="Trigo">Trigo</option>
+                  <option value="Cana-de-açúcar">Cana-de-açúcar</option>
+                  <option value="Café">Café</option>
+                  <option value="Pastagem">Pastagem</option>
+                  <option value="Outros">Outros</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="talhaoObservacoes" class="form-label">Observações</label>
+                <textarea class="form-control" id="talhaoObservacoes" rows="3" placeholder="Informações adicionais sobre o talhão (opcional)"></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="saveTalhao()">Salvar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Entrada -->
+    <div class="modal fade" id="entradaModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="entradaModalTitle">Nova Entrada</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="entradaForm">
+              <input type="hidden" id="entradaId">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="entradaData" class="form-label">Data *</label>
+                    <input type="date" class="form-control" id="entradaData" required>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="entradaTipo" class="form-label">Tipo *</label>
+                    <select class="form-control" id="entradaTipo" required>
+                      <option value="">Selecione o tipo</option>
+                      <option value="Compra">Compra</option>
+                      <option value="Transferência Positiva">Transferência Positiva</option>
+                      <option value="Devolução">Devolução</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="entradaInsumo" class="form-label">Insumo *</label>
+                    <select class="form-control" id="entradaInsumo" required>
+                      <option value="">Selecione um insumo</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="entradaFornecedor" class="form-label">Fornecedor *</label>
+                    <select class="form-control" id="entradaFornecedor" required>
+                      <option value="">Selecione um fornecedor</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="mb-3">
+                    <label for="entradaQuantidade" class="form-label">Quantidade *</label>
+                    <input type="number" class="form-control" id="entradaQuantidade" min="0" step="0.01" required>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="mb-3">
+                    <label for="entradaValorUnitario" class="form-label">Valor Unitário (R$)</label>
+                    <input type="number" class="form-control" id="entradaValorUnitario" min="0" step="0.01" placeholder="0.00">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="mb-3">
+                    <label for="entradaValorTotal" class="form-label">Valor Total (R$)</label>
+                    <input type="number" class="form-control" id="entradaValorTotal" min="0" step="0.01" placeholder="0.00" readonly>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="entradaObservacoes" class="form-label">Observações</label>
+                <textarea class="form-control" id="entradaObservacoes" rows="3" placeholder="Informações adicionais sobre a entrada (opcional)"></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-success" onclick="saveEntrada()">Salvar Entrada</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Saída -->
+    <div class="modal fade" id="saidaModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="saidaModalTitle">Nova Saída</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="saidaForm">
+              <input type="hidden" id="saidaId">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="saidaData" class="form-label">Data *</label>
+                    <input type="date" class="form-control" id="saidaData" required>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="saidaTipo" class="form-label">Tipo *</label>
+                    <select class="form-control" id="saidaTipo" onchange="toggleTalhaoField()" required>
+                      <option value="">Selecione o tipo</option>
+                      <option value="Aplicação">Aplicação</option>
+                      <option value="Transferência Negativa">Transferência Negativa</option>
+                      <option value="Perda/Avaria">Perda/Avaria</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="saidaInsumo" class="form-label">Insumo *</label>
+                    <select class="form-control" id="saidaInsumo" required>
+                      <option value="">Selecione um insumo</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-6" id="saidaTalhaoContainer">
+                  <div class="mb-3">
+                    <label for="saidaTalhao" class="form-label">Talhão</label>
+                    <select class="form-control" id="saidaTalhao">
+                      <option value="">Selecione um talhão</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="saidaQuantidade" class="form-label">Quantidade *</label>
+                <input type="number" class="form-control" id="saidaQuantidade" min="0" step="0.01" required>
+              </div>
+              <div class="mb-3">
+                <label for="saidaObservacoes" class="form-label">Observações</label>
+                <textarea class="form-control" id="saidaObservacoes" rows="3" placeholder="Informações adicionais sobre a saída (opcional)"></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-danger" onclick="saveSaida()">Salvar Saída</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modais serão adicionados dinamicamente -->
+    <div id="modalContainer"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Variáveis globais
+        let currentSection = 'dashboard';
+        
+        // Configuração da Web App do Google Apps Script
+        // Como o HTML é servido pelo próprio Google Apps Script, usamos URL relativa
+        const WEBAPP_URL = window.location.href;
+        
+        let data = {
+            insumos: [],
+            fornecedores: [],
+            talhoes: [],
+            entradas: [],
+            saidas: [],
+            estoque: []
+        };
+        
+        // Função para fazer requisições para a Web App
+        async function callWebApp(action, payload = {}) {
+            try {
+                console.log('callWebApp: Enviando requisição:', { action, payload, url: WEBAPP_URL });
+                
+                const requestBody = {
+                    action: action,
+                    ...payload
+                };
+                
+                console.log('callWebApp: Corpo da requisição:', JSON.stringify(requestBody));
+                
+                const response = await fetch(WEBAPP_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                console.log('callWebApp: Resposta recebida:', { status: response.status, statusText: response.statusText });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('callWebApp: Dados recebidos:', result);
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                return result;
+            } catch (error) {
+                console.error('Erro na requisição para Google Apps Script:', error);
+                throw error;
+            }
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            updateDashboard();
+        });
+
+        // Função para mostrar loading
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        // Função para esconder loading
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Função para carregar dados do Google Sheets
+        async function loadData() {
+            console.log('loadData: Iniciando carregamento de dados...');
+            showLoading();
+            try {
+                console.log('loadData: Tentando conectar com Google Sheets...');
+                // Tentar carregar dados da Web App do Google Apps Script
+                const result = await callWebApp('getAllData');
+                console.log('loadData: Dados recebidos do Google Sheets:', result);
+                onDataLoaded(result);
+            } catch (error) {
+                console.log('Erro ao conectar com Google Sheets - carregando dados mock:', error);
+                loadMockData();
+            }
+            hideLoading();
+        }
+
+        // Função para carregar dados mock (desenvolvimento)
+        function loadMockData() {
+            data = {
+                insumos: [
+                    {id: 1, nome: 'Fertilizante NPK', categoria: 'Fertilizante', unidade: 'kg', estoqueMinimo: 100},
+                    {id: 2, nome: 'Herbicida Glifosato', categoria: 'Defensivo', unidade: 'L', estoqueMinimo: 50}
+                ],
+                fornecedores: [
+                    {id: 1, nome: 'AgroSuprimentos Ltda', contato: '(11) 99999-9999', email: 'contato@agrosup.com'},
+                    {id: 2, nome: 'Fertilizantes do Campo', contato: '(11) 88888-8888', email: 'vendas@fertcampo.com'}
+                ],
+                talhoes: [
+                    {id: 1, nome: 'Talhão A1', area: 10.5, cultura: 'Soja'},
+                    {id: 2, nome: 'Talhão B2', area: 8.3, cultura: 'Milho'}
+                ],
+                entradas: [],
+                saidas: [],
+                estoque: [
+                    {insumoId: 1, quantidade: 150, valorUnitario: 2.50},
+                    {insumoId: 2, quantidade: 75, valorUnitario: 15.00}
+                ]
+            };
+            updateDashboard();
+        }
+
+        // Callback para dados carregados
+        function onDataLoaded(result) {
+            data = result;
+            updateDashboard();
+        }
+
+        // Callback para erro
+        function onError(error) {
+            console.error('Erro ao carregar dados:', error);
+            showAlert('Erro ao carregar dados. Verifique a conexão.', 'danger');
+            loadMockData();
+        }
+
+        // Função para atualizar dashboard
+        function updateDashboard() {
+            document.getElementById('totalInsumos').textContent = data.insumos.length;
+            document.getElementById('totalFornecedores').textContent = data.fornecedores.length;
+            document.getElementById('totalTalhoes').textContent = data.talhoes.length;
+            document.getElementById('totalEstoque').textContent = data.estoque.length;
+            
+            updateEstoqueBaixo();
+            updateUltimasMovimentacoes();
+        }
+
+        // Função para mostrar seção
+        function showSection(section) {
+            // Atualizar sidebar
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.sidebar-item').classList.add('active');
+            
+            // Esconder dashboard
+            document.getElementById('dashboard').style.display = 'none';
+            
+            currentSection = section;
+            loadSectionContent(section);
+        }
+
+        // Função para mostrar dashboard
+        function showDashboard() {
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector('.sidebar-item').classList.add('active');
+            
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('dynamicContent').innerHTML = '';
+            currentSection = 'dashboard';
+        }
+
+        // Função para carregar conteúdo da seção
+        function loadSectionContent(section) {
+            // Esconder todas as seções
+            document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+            
+            // Mostrar seção específica
+            const sectionElement = document.getElementById(section);
+            if (sectionElement) {
+                sectionElement.style.display = 'block';
+                
+                // Carregar dados específicos da seção
+                switch(section) {
+                    case 'insumos':
+                        loadInsumosTable();
+                        break;
+                    case 'fornecedores':
+                        loadFornecedoresTable();
+                        break;
+                    case 'talhoes':
+                        loadTalhoesTable();
+                        break;
+                    case 'entradas':
+                        loadEntradasTable();
+                        break;
+                    case 'saidas':
+                        loadSaidasTable();
+                        break;
+                    case 'estoque':
+                        loadEstoqueTable();
+                        break;
+                }
+            } else {
+                // Fallback para conteúdo dinâmico
+                const content = document.getElementById('dynamicContent');
+                switch(section) {
+                    case 'fornecedores':
+                        content.innerHTML = getFornecedoresHTML();
+                        break;
+                    case 'talhoes':
+                        content.innerHTML = getTalhoesHTML();
+                        break;
+                    case 'entradas':
+                        content.innerHTML = getEntradasHTML();
+                        break;
+                    case 'saidas':
+                        content.innerHTML = getSaidasHTML();
+                        break;
+                    case 'estoque':
+                        content.innerHTML = getEstoqueHTML();
+                        break;
+                }
+            }
+        }
+
+        // Função para mostrar alerta
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            const container = document.querySelector('.content-area');
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Função para atualizar dados
+        function refreshData() {
+            loadData();
+            updateDashboard();
+            showAlert('Dados atualizados com sucesso!', 'success');
+        }
+
+        // Funções para gerar HTML das seções (serão implementadas)
+        function getInsumosHTML() {
+            return `
+                <div class="fade-in">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-flask me-2"></i>Gestão de Insumos</h2>
+                        <button class="btn btn-primary" onclick="openInsumoModal()">
+                            <i class="fas fa-plus me-2"></i>Novo Insumo
+                        </button>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nome</th>
+                                            <th>Categoria</th>
+                                            <th>Unidade</th>
+                                            <th>Estoque Mínimo</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="insumosTableBody">
+                                        ${data.insumos.map(insumo => `
+                                            <tr>
+                                                <td>${insumo.id}</td>
+                                                <td>${insumo.nome}</td>
+                                                <td><span class="badge bg-secondary">${insumo.categoria}</span></td>
+                                                <td>${insumo.unidade}</td>
+                                                <td>${insumo.estoqueMinimo}</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-warning me-1" onclick="editInsumo(${insumo.id})">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger" onclick="deleteInsumo(${insumo.id})">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getFornecedoresHTML() {
+            return `
+                <div class="fade-in">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-truck me-2"></i>Gestão de Fornecedores</h2>
+                        <button class="btn btn-primary" onclick="openFornecedorModal()">
+                            <i class="fas fa-plus me-2"></i>Novo Fornecedor
+                        </button>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nome</th>
+                                            <th>Contato</th>
+                                            <th>Email</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${data.fornecedores.map(fornecedor => `
+                                            <tr>
+                                                <td>${fornecedor.id}</td>
+                                                <td>${fornecedor.nome}</td>
+                                                <td>${fornecedor.contato}</td>
+                                                <td>${fornecedor.email}</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-warning me-1" onclick="editFornecedor(${fornecedor.id})">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger" onclick="deleteFornecedor(${fornecedor.id})">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getTalhoesHTML() {
+            return `
+                <div class="fade-in">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-map-marked-alt me-2"></i>Gestão de Talhões</h2>
+                        <button class="btn btn-primary" onclick="openTalhaoModal()">
+                            <i class="fas fa-plus me-2"></i>Novo Talhão
+                        </button>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nome</th>
+                                            <th>Área (ha)</th>
+                                            <th>Cultura</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${data.talhoes.map(talhao => `
+                                            <tr>
+                                                <td>${talhao.id}</td>
+                                                <td>${talhao.nome}</td>
+                                                <td>${talhao.area}</td>
+                                                <td><span class="badge bg-success">${talhao.cultura}</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-warning me-1" onclick="editTalhao(${talhao.id})">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger" onclick="deleteTalhao(${talhao.id})">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getEntradasHTML() {
+            return `
+                <div class="fade-in">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-plus-circle me-2"></i>Lançamento de Entradas</h2>
+                        <button class="btn btn-success" onclick="openEntradaModal()">
+                            <i class="fas fa-plus me-2"></i>Nova Entrada
+                        </button>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th>Insumo</th>
+                                            <th>Quantidade</th>
+                                            <th>Tipo</th>
+                                            <th>Fornecedor</th>
+                                            <th>Valor Total</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${data.entradas.map(entrada => `
+                                            <tr>
+                                                <td>${entrada.data}</td>
+                                                <td>${getInsumoNome(entrada.insumoId)}</td>
+                                                <td>${entrada.quantidade}</td>
+                                                <td><span class="badge bg-info">${entrada.tipo}</span></td>
+                                                <td>${getFornecedorNome(entrada.fornecedorId)}</td>
+                                                <td>R$ ${entrada.valorTotal}</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-danger" onclick="deleteEntrada(${entrada.id})">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getSaidasHTML() {
+            return `
+                <div class="fade-in">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-minus-circle me-2"></i>Lançamento de Saídas</h2>
+                        <button class="btn btn-warning" onclick="openSaidaModal()">
+                            <i class="fas fa-minus me-2"></i>Nova Saída
+                        </button>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th>Insumo</th>
+                                            <th>Quantidade</th>
+                                            <th>Tipo</th>
+                                            <th>Talhão</th>
+                                            <th>Observações</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${data.saidas.map(saida => `
+                                            <tr>
+                                                <td>${saida.data}</td>
+                                                <td>${getInsumoNome(saida.insumoId)}</td>
+                                                <td>${saida.quantidade}</td>
+                                                <td><span class="badge bg-warning">${saida.tipo}</span></td>
+                                                <td>${getTalhaoNome(saida.talhaoId)}</td>
+                                                <td>${saida.observacoes}</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-danger" onclick="deleteSaida(${saida.id})">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getEstoqueHTML() {
+            return `
+                <div class="fade-in">
+                    <h2 class="mb-4"><i class="fas fa-warehouse me-2"></i>Controle de Estoque</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Insumo</th>
+                                            <th>Quantidade Atual</th>
+                                            <th>Unidade</th>
+                                            <th>Estoque Mínimo</th>
+                                            <th>Status</th>
+                                            <th>Valor Unitário</th>
+                                            <th>Valor Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${data.estoque.map(item => {
+                                            const insumo = data.insumos.find(i => i.id === item.insumoId);
+                                            const status = item.quantidade <= insumo.estoqueMinimo ? 'Baixo' : 'Normal';
+                                            const statusClass = status === 'Baixo' ? 'bg-danger' : 'bg-success';
+                                            return `
+                                                <tr>
+                                                    <td>${insumo.nome}</td>
+                                                    <td>${item.quantidade}</td>
+                                                    <td>${insumo.unidade}</td>
+                                                    <td>${insumo.estoqueMinimo}</td>
+                                                    <td><span class="badge ${statusClass}">${status}</span></td>
+                                                    <td>R$ ${item.valorUnitario.toFixed(2)}</td>
+                                                    <td>R$ ${(item.quantidade * item.valorUnitario).toFixed(2)}</td>
+                                                </tr>
+                                            `;
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Funções auxiliares
+        function getInsumoNome(id) {
+            const insumo = data.insumos.find(i => i.id === id);
+            return insumo ? insumo.nome : 'N/A';
+        }
+
+        function getFornecedorNome(id) {
+            const fornecedor = data.fornecedores.find(f => f.id === id);
+            return fornecedor ? fornecedor.nome : 'N/A';
+        }
+
+        function getTalhaoNome(id) {
+            const talhao = data.talhoes.find(t => t.id === id);
+            return talhao ? talhao.nome : 'N/A';
+        }
+
+        function updateEstoqueBaixo() {
+            const estoqueBaixo = data.estoque.filter(item => {
+                const insumo = data.insumos.find(i => i.id === item.insumoId);
+                return item.quantidade <= insumo.estoqueMinimo;
+            });
+            
+            const container = document.getElementById('estoqueBaixo');
+            if (estoqueBaixo.length === 0) {
+                container.innerHTML = '<p class="text-success">Todos os itens estão com estoque adequado!</p>';
+            } else {
+                container.innerHTML = estoqueBaixo.map(item => {
+                    const insumo = data.insumos.find(i => i.id === item.insumoId);
+                    return `<div class="alert alert-warning py-2 mb-2">${insumo.nome}: ${item.quantidade} ${insumo.unidade}</div>`;
+                }).join('');
+            }
+        }
+
+        function updateUltimasMovimentacoes() {
+            const container = document.getElementById('ultimasMovimentacoes');
+            const movimentacoes = [...data.entradas, ...data.saidas]
+                .sort((a, b) => new Date(b.data) - new Date(a.data))
+                .slice(0, 5);
+            
+            if (movimentacoes.length === 0) {
+                container.innerHTML = '<p class="text-muted">Nenhuma movimentação registrada.</p>';
+            } else {
+                container.innerHTML = movimentacoes.map(mov => {
+                    const tipo = mov.tipo || (mov.fornecedorId ? 'Entrada' : 'Saída');
+                    const icon = tipo === 'Entrada' ? 'fa-plus text-success' : 'fa-minus text-warning';
+                    return `<div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <div><i class="fas ${icon} me-2"></i>${getInsumoNome(mov.insumoId)}</div>
+                        <small class="text-muted">${mov.data}</small>
+                    </div>`;
+                }).join('');
+            }
+        }
+
+        // Funções de modal para insumos
+        function openInsumoModal(id = null) {
+            const modal = new bootstrap.Modal(document.getElementById('insumoModal'));
+            const form = document.getElementById('insumoForm');
+            const title = document.getElementById('insumoModalTitle');
+            
+            // Limpar formulário
+            form.reset();
+            document.getElementById('insumoId').value = '';
+            
+            if (id) {
+                // Modo edição
+                const insumo = data.insumos.find(i => i.id === id);
+                if (insumo) {
+                    title.textContent = 'Editar Insumo';
+                    document.getElementById('insumoId').value = insumo.id;
+                    document.getElementById('insumoNome').value = insumo.nome;
+                    document.getElementById('insumoCategoria').value = insumo.categoria;
+                    document.getElementById('insumoUnidade').value = insumo.unidade;
+                    document.getElementById('insumoEstoqueMinimo').value = insumo.estoqueMinimo;
+                }
+            } else {
+                // Modo criação
+                title.textContent = 'Novo Insumo';
+            }
+            
+            modal.show();
+        }
+        
+        async function saveInsumo() {
+            const form = document.getElementById('insumoForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const id = document.getElementById('insumoId').value;
+            const insumoData = {
+                nome: document.getElementById('insumoNome').value,
+                categoria: document.getElementById('insumoCategoria').value,
+                unidade: document.getElementById('insumoUnidade').value,
+                estoqueMinimo: parseFloat(document.getElementById('insumoEstoqueMinimo').value)
+            };
+            
+            if (id) {
+                // Editar insumo existente
+                const index = data.insumos.findIndex(i => i.id === parseInt(id));
+                if (index !== -1) {
+                    data.insumos[index] = { ...data.insumos[index], ...insumoData };
+                    showAlert('Insumo atualizado com sucesso!', 'success');
+                }
+            } else {
+                // Criar novo insumo
+                const newId = Math.max(...data.insumos.map(i => i.id), 0) + 1;
+                data.insumos.push({ id: newId, ...insumoData });
+                showAlert('Insumo criado com sucesso!', 'success');
+            }
+            
+            // Fechar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('insumoModal'));
+            modal.hide();
+            
+            // Atualizar interface
+            updateDashboard();
+            if (currentSection === 'insumos') {
+                loadSectionContent('insumos');
+            }
+            
+            // Salvar no Google Sheets (se disponível)
+            try {
+                await callWebApp('saveInsumo', { insumo: insumoData });
+                console.log('Dados salvos no Google Sheets');
+            } catch (error) {
+                console.log('Google Apps Script não disponível - dados salvos localmente');
+                console.error('Erro ao salvar no Google Sheets:', error);
+            }
+        }
+
+        function openFornecedorModal(id = null) {
+            const modal = new bootstrap.Modal(document.getElementById('fornecedorModal'));
+            const form = document.getElementById('fornecedorForm');
+            const title = document.getElementById('fornecedorModalTitle');
+            
+            // Limpar formulário
+            form.reset();
+            document.getElementById('fornecedorId').value = '';
+            
+            if (id) {
+                // Modo edição
+                const fornecedor = data.fornecedores.find(f => f.id === id);
+                if (fornecedor) {
+                    title.textContent = 'Editar Fornecedor';
+                    document.getElementById('fornecedorId').value = fornecedor.id;
+                    document.getElementById('fornecedorNome').value = fornecedor.nome;
+                    document.getElementById('fornecedorContato').value = fornecedor.contato;
+                    document.getElementById('fornecedorEmail').value = fornecedor.email;
+                    document.getElementById('fornecedorEndereco').value = fornecedor.endereco || '';
+                }
+            } else {
+                // Modo criação
+                title.textContent = 'Novo Fornecedor';
+            }
+            
+            modal.show();
+        }
+        
+        async function saveFornecedor() {
+            const form = document.getElementById('fornecedorForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const id = document.getElementById('fornecedorId').value;
+            const fornecedorData = {
+                nome: document.getElementById('fornecedorNome').value,
+                contato: document.getElementById('fornecedorContato').value,
+                email: document.getElementById('fornecedorEmail').value,
+                endereco: document.getElementById('fornecedorEndereco').value
+            };
+            
+            if (id) {
+                // Editar fornecedor existente
+                const index = data.fornecedores.findIndex(f => f.id === parseInt(id));
+                if (index !== -1) {
+                    data.fornecedores[index] = { ...data.fornecedores[index], ...fornecedorData };
+                    showAlert('Fornecedor atualizado com sucesso!', 'success');
+                }
+            } else {
+                // Criar novo fornecedor
+                const newId = Math.max(...data.fornecedores.map(f => f.id), 0) + 1;
+                data.fornecedores.push({ id: newId, ...fornecedorData });
+                showAlert('Fornecedor criado com sucesso!', 'success');
+            }
+            
+            // Fechar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('fornecedorModal'));
+            modal.hide();
+            
+            // Atualizar interface
+            if (currentSection === 'fornecedores') {
+                loadSectionContent('fornecedores');
+            }
+            
+            // Salvar no Google Sheets (se disponível)
+            try {
+                await callWebApp('saveFornecedor', { fornecedor: fornecedorData });
+                console.log('Fornecedor salvo no Google Sheets');
+            } catch (error) {
+                console.log('Google Apps Script não disponível - dados salvos localmente');
+                console.error('Erro ao salvar fornecedor no Google Sheets:', error);
+            }
+        }
+        
+        function editFornecedor(id) {
+            openFornecedorModal(id);
+        }
+        
+        async function deleteFornecedor(id) {
+            if (confirm('Tem certeza que deseja excluir este fornecedor?')) {
+                const index = data.fornecedores.findIndex(f => f.id === id);
+                if (index !== -1) {
+                    data.fornecedores.splice(index, 1);
+                    showAlert('Fornecedor excluído com sucesso!', 'success');
+                    
+                    // Atualizar interface
+                    if (currentSection === 'fornecedores') {
+                        loadSectionContent('fornecedores');
+                    }
+                    
+                    // Excluir do Google Sheets (se disponível)
+                    try {
+                        await callWebApp('deleteFornecedor', { id: id });
+                        console.log('Fornecedor excluído do Google Sheets');
+                    } catch (error) {
+                        console.log('Google Apps Script não disponível - dados excluídos localmente');
+                        console.error('Erro ao excluir fornecedor do Google Sheets:', error);
+                    }
+                }
+            }
+        }
+
+        function openTalhaoModal(id = null) {
+            const modal = new bootstrap.Modal(document.getElementById('talhaoModal'));
+            const form = document.getElementById('talhaoForm');
+            const title = document.getElementById('talhaoModalTitle');
+            
+            // Limpar formulário
+            form.reset();
+            document.getElementById('talhaoId').value = '';
+            
+            if (id) {
+                // Modo edição
+                const talhao = data.talhoes.find(t => t.id === id);
+                if (talhao) {
+                    title.textContent = 'Editar Talhão';
+                    document.getElementById('talhaoId').value = talhao.id;
+                    document.getElementById('talhaoNome').value = talhao.nome;
+                    document.getElementById('talhaoArea').value = talhao.area;
+                    document.getElementById('talhaoCultura').value = talhao.cultura;
+                    document.getElementById('talhaoObservacoes').value = talhao.observacoes || '';
+                }
+            } else {
+                // Modo criação
+                title.textContent = 'Novo Talhão';
+            }
+            
+            modal.show();
+        }
+        
+        async function saveTalhao() {
+            const form = document.getElementById('talhaoForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const id = document.getElementById('talhaoId').value;
+            const talhaoData = {
+                nome: document.getElementById('talhaoNome').value,
+                area: parseFloat(document.getElementById('talhaoArea').value),
+                cultura: document.getElementById('talhaoCultura').value,
+                observacoes: document.getElementById('talhaoObservacoes').value
+            };
+            
+            if (id) {
+                // Editar talhão existente
+                const index = data.talhoes.findIndex(t => t.id === parseInt(id));
+                if (index !== -1) {
+                    data.talhoes[index] = { ...data.talhoes[index], ...talhaoData };
+                    showAlert('Talhão atualizado com sucesso!', 'success');
+                }
+            } else {
+                // Criar novo talhão
+                const newId = Math.max(...data.talhoes.map(t => t.id), 0) + 1;
+                data.talhoes.push({ id: newId, ...talhaoData });
+                showAlert('Talhão criado com sucesso!', 'success');
+            }
+            
+            // Fechar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('talhaoModal'));
+            modal.hide();
+            
+            // Atualizar interface
+            if (currentSection === 'talhoes') {
+                loadSectionContent('talhoes');
+            }
+            
+            // Salvar no Google Sheets (se disponível)
+            try {
+                await callWebApp('saveTalhao', { talhao: talhaoData });
+                console.log('Talhão salvo no Google Sheets');
+            } catch (error) {
+                console.log('Google Apps Script não disponível - dados salvos localmente');
+                console.error('Erro ao salvar talhão no Google Sheets:', error);
+            }
+        }
+        
+        function editTalhao(id) {
+            openTalhaoModal(id);
+        }
+        
+        async function deleteTalhao(id) {
+            if (confirm('Tem certeza que deseja excluir este talhão?')) {
+                const index = data.talhoes.findIndex(t => t.id === id);
+                if (index !== -1) {
+                    data.talhoes.splice(index, 1);
+                    showAlert('Talhão excluído com sucesso!', 'success');
+                    
+                    // Atualizar interface
+                    if (currentSection === 'talhoes') {
+                        loadSectionContent('talhoes');
+                    }
+                    
+                    // Excluir do Google Sheets (se disponível)
+                    try {
+                        await callWebApp('deleteTalhao', { id: id });
+                        console.log('Talhão excluído do Google Sheets');
+                    } catch (error) {
+                        console.log('Google Apps Script não disponível - dados excluídos localmente');
+                        console.error('Erro ao excluir talhão do Google Sheets:', error);
+                    }
+                }
+            }
+        }
+
+        function openEntradaModal(id = null) {
+            const modal = new bootstrap.Modal(document.getElementById('entradaModal'));
+            const form = document.getElementById('entradaForm');
+            const title = document.getElementById('entradaModalTitle');
+            
+            // Limpar formulário
+            form.reset();
+            document.getElementById('entradaId').value = '';
+            
+            // Preencher selects
+            populateInsumoSelect('entradaInsumo');
+            populateFornecedorSelect('entradaFornecedor');
+            
+            // Definir data atual como padrão
+            document.getElementById('entradaData').value = new Date().toISOString().split('T')[0];
+            
+            if (id) {
+                // Modo edição
+                const entrada = data.entradas.find(e => e.id === id);
+                if (entrada) {
+                    title.textContent = 'Editar Entrada';
+                    document.getElementById('entradaId').value = entrada.id;
+                    document.getElementById('entradaData').value = entrada.data;
+                    document.getElementById('entradaTipo').value = entrada.tipo;
+                    document.getElementById('entradaInsumo').value = entrada.insumoId;
+                    document.getElementById('entradaFornecedor').value = entrada.fornecedorId;
+                    document.getElementById('entradaQuantidade').value = entrada.quantidade;
+                    document.getElementById('entradaValorUnitario').value = entrada.valorUnitario || '';
+                    document.getElementById('entradaValorTotal').value = entrada.valorTotal || '';
+                    document.getElementById('entradaObservacoes').value = entrada.observacoes || '';
+                }
+            } else {
+                // Modo criação
+                title.textContent = 'Nova Entrada';
+            }
+            
+            // Adicionar event listeners para cálculo automático
+            const quantidadeInput = document.getElementById('entradaQuantidade');
+            const valorUnitarioInput = document.getElementById('entradaValorUnitario');
+            const valorTotalInput = document.getElementById('entradaValorTotal');
+            
+            function calcularValorTotal() {
+                const quantidade = parseFloat(quantidadeInput.value) || 0;
+                const valorUnitario = parseFloat(valorUnitarioInput.value) || 0;
+                valorTotalInput.value = (quantidade * valorUnitario).toFixed(2);
+            }
+            
+            quantidadeInput.addEventListener('input', calcularValorTotal);
+            valorUnitarioInput.addEventListener('input', calcularValorTotal);
+            
+            modal.show();
+        }
+        
+        async function saveEntrada() {
+            const form = document.getElementById('entradaForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const id = document.getElementById('entradaId').value;
+            const entradaData = {
+                data: document.getElementById('entradaData').value,
+                tipo: document.getElementById('entradaTipo').value,
+                insumoId: parseInt(document.getElementById('entradaInsumo').value),
+                fornecedorId: parseInt(document.getElementById('entradaFornecedor').value),
+                quantidade: parseFloat(document.getElementById('entradaQuantidade').value),
+                valorUnitario: parseFloat(document.getElementById('entradaValorUnitario').value) || 0,
+                valorTotal: parseFloat(document.getElementById('entradaValorTotal').value) || 0,
+                observacoes: document.getElementById('entradaObservacoes').value
+            };
+            
+            if (id) {
+                // Editar entrada existente
+                const index = data.entradas.findIndex(e => e.id === parseInt(id));
+                if (index !== -1) {
+                    const oldEntrada = data.entradas[index];
+                    data.entradas[index] = { ...oldEntrada, ...entradaData };
+                    
+                    // Atualizar estoque (remover quantidade antiga e adicionar nova)
+                    updateEstoque(oldEntrada.insumoId, -oldEntrada.quantidade);
+                    updateEstoque(entradaData.insumoId, entradaData.quantidade);
+                    
+                    showAlert('Entrada atualizada com sucesso!', 'success');
+                }
+            } else {
+                // Criar nova entrada
+                const newId = Math.max(...data.entradas.map(e => e.id), 0) + 1;
+                data.entradas.push({ id: newId, ...entradaData });
+                
+                // Atualizar estoque
+                updateEstoque(entradaData.insumoId, entradaData.quantidade);
+                
+                showAlert('Entrada registrada com sucesso!', 'success');
+            }
+            
+            // Fechar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('entradaModal'));
+            modal.hide();
+            
+            // Atualizar interface
+            updateDashboard();
+            if (currentSection === 'entradas') {
+                loadSectionContent('entradas');
+            }
+            
+            // Salvar no Google Sheets (se disponível)
+            try {
+                await callWebApp('saveEntrada', { entrada: entradaData });
+                console.log('Entrada salva no Google Sheets');
+            } catch (error) {
+                console.log('Google Apps Script não disponível - dados salvos localmente');
+                console.error('Erro ao salvar entrada no Google Sheets:', error);
+            }
+        }
+        
+        async function deleteEntrada(id) {
+            if (confirm('Tem certeza que deseja excluir esta entrada?')) {
+                const index = data.entradas.findIndex(e => e.id === id);
+                if (index !== -1) {
+                    const entrada = data.entradas[index];
+                    
+                    // Remover do estoque
+                    updateEstoque(entrada.insumoId, -entrada.quantidade);
+                    
+                    data.entradas.splice(index, 1);
+                    showAlert('Entrada excluída com sucesso!', 'success');
+                    
+                    // Atualizar interface
+                    updateDashboard();
+                    if (currentSection === 'entradas') {
+                        loadSectionContent('entradas');
+                    }
+                    
+                    // Excluir do Google Sheets (se disponível)
+                    try {
+                        await callWebApp('deleteEntrada', { id: id });
+                        console.log('Entrada excluída do Google Sheets');
+                    } catch (error) {
+                        console.log('Google Apps Script não disponível - dados excluídos localmente');
+                        console.error('Erro ao excluir entrada do Google Sheets:', error);
+                    }
+                }
+            }
+        }
+
+        function openSaidaModal(id = null) {
+            const modal = document.getElementById('saidaModal');
+            const form = document.getElementById('saidaForm');
+            const title = document.getElementById('saidaModalTitle');
+            
+            // Resetar formulário
+            form.reset();
+            
+            // Popular selects
+            populateInsumoSelect('saidaInsumo');
+            populateTalhaoSelect('saidaTalhao');
+            
+            if (id) {
+                // Modo edição
+                title.textContent = 'Editar Saída';
+                const saida = data.saidas.find(s => s.id === id);
+                if (saida) {
+                    document.getElementById('saidaData').value = saida.data;
+                    document.getElementById('saidaTipo').value = saida.tipo;
+                    document.getElementById('saidaInsumo').value = saida.insumoId;
+                    document.getElementById('saidaTalhao').value = saida.talhaoId || '';
+                    document.getElementById('saidaQuantidade').value = saida.quantidade;
+                    document.getElementById('saidaObservacoes').value = saida.observacoes || '';
+                    form.dataset.editId = id;
+                }
+            } else {
+                // Modo criação
+                title.textContent = 'Nova Saída';
+                document.getElementById('saidaData').value = new Date().toISOString().split('T')[0];
+                delete form.dataset.editId;
+            }
+            
+            // Mostrar/ocultar campo talhão baseado no tipo
+            toggleTalhaoField();
+            
+            modal.style.display = 'block';
+        }
+
+        // Funções de edição e exclusão para insumos
+        function editInsumo(id) {
+            openInsumoModal(id);
+        }
+        
+        async function deleteInsumo(id) {
+            if (confirm('Tem certeza que deseja excluir este insumo?')) {
+                // Verificar se o insumo está sendo usado no estoque
+                const estoqueItem = data.estoque.find(e => e.insumoId === id);
+                if (estoqueItem && estoqueItem.quantidade > 0) {
+                    showAlert('Não é possível excluir este insumo pois há quantidade em estoque.', 'warning');
+                    return;
+                }
+                
+                // Verificar se há movimentações para este insumo
+                const temMovimentacoes = data.entradas.some(e => e.insumoId === id) || data.saidas.some(s => s.insumoId === id);
+                if (temMovimentacoes) {
+                    showAlert('Não é possível excluir este insumo pois há movimentações registradas.', 'warning');
+                    return;
+                }
+                
+                // Remover insumo
+                const index = data.insumos.findIndex(i => i.id === id);
+                if (index !== -1) {
+                    data.insumos.splice(index, 1);
+                    
+                    // Remover do estoque também
+                    const estoqueIndex = data.estoque.findIndex(e => e.insumoId === id);
+                    if (estoqueIndex !== -1) {
+                        data.estoque.splice(estoqueIndex, 1);
+                    }
+                    
+                    showAlert('Insumo excluído com sucesso!', 'success');
+                    
+                    // Atualizar interface
+                    updateDashboard();
+                    if (currentSection === 'insumos') {
+                        loadSectionContent('insumos');
+                    }
+                    
+                    // Excluir do Google Sheets (se disponível)
+                    try {
+                        await callWebApp('deleteInsumo', { id: id });
+                        console.log('Insumo excluído no Google Sheets');
+                    } catch (error) {
+                        console.log('Google Apps Script não disponível - dados excluídos localmente');
+                        console.error('Erro ao excluir no Google Sheets:', error);
+                    }
+                }
+            }
+        }
+        // Funções auxiliares para popular selects
+        function populateInsumoSelect(selectId) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '<option value="">Selecione um insumo</option>';
+            
+            data.insumos.forEach(insumo => {
+                const option = document.createElement('option');
+                option.value = insumo.id;
+                option.textContent = `${insumo.nome} (${insumo.unidade})`;
+                select.appendChild(option);
+            });
+        }
+        
+        function populateFornecedorSelect(selectId) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '<option value="">Selecione um fornecedor</option>';
+            
+            data.fornecedores.forEach(fornecedor => {
+                const option = document.createElement('option');
+                option.value = fornecedor.id;
+                option.textContent = fornecedor.nome;
+                select.appendChild(option);
+            });
+        }
+        
+        function populateTalhaoSelect(selectId) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '<option value="">Selecione um talhão</option>';
+            
+            data.talhoes.forEach(talhao => {
+                const option = document.createElement('option');
+                option.value = talhao.id;
+                option.textContent = `${talhao.nome} - ${talhao.cultura} (${talhao.area}ha)`;
+                select.appendChild(option);
+            });
+        }
+        
+        // Função para atualizar estoque
+        function updateEstoque(insumoId, quantidade) {
+            let estoqueItem = data.estoque.find(e => e.insumoId === insumoId);
+            
+            if (!estoqueItem) {
+                // Criar novo item no estoque
+                estoqueItem = {
+                    id: Math.max(...data.estoque.map(e => e.id), 0) + 1,
+                    insumoId: insumoId,
+                    quantidade: 0
+                };
+                data.estoque.push(estoqueItem);
+            }
+            
+            estoqueItem.quantidade += quantidade;
+            
+            // Não permitir estoque negativo
+            if (estoqueItem.quantidade < 0) {
+                estoqueItem.quantidade = 0;
+            }
+        }
+        
+        // Funções auxiliares para obter nomes
+        function getInsumoNome(insumoId) {
+            const insumo = data.insumos.find(i => i.id === insumoId);
+            return insumo ? insumo.nome : 'Insumo não encontrado';
+        }
+        
+        function getFornecedorNome(fornecedorId) {
+            const fornecedor = data.fornecedores.find(f => f.id === fornecedorId);
+            return fornecedor ? fornecedor.nome : 'Fornecedor não encontrado';
+        }
+        
+        function getTalhaoNome(talhaoId) {
+            const talhao = data.talhoes.find(t => t.id === talhaoId);
+            return talhao ? talhao.nome : 'Talhão não encontrado';
+        }
+        
+        // Função para alternar visibilidade do campo talhão
+        function toggleTalhaoField() {
+            const tipo = document.getElementById('saidaTipo').value;
+            const container = document.getElementById('saidaTalhaoContainer');
+            const talhaoSelect = document.getElementById('saidaTalhao');
+            
+            if (tipo === 'Aplicação') {
+                container.style.display = 'block';
+                talhaoSelect.required = true;
+            } else {
+                container.style.display = 'none';
+                talhaoSelect.required = false;
+                talhaoSelect.value = '';
+            }
+        }
+        
+        // Função para salvar saída
+        async function saveSaida() {
+            const form = document.getElementById('saidaForm');
+            const formData = new FormData(form);
+            
+            // Validar campos obrigatórios
+            const data = document.getElementById('saidaData').value;
+            const tipo = document.getElementById('saidaTipo').value;
+            const insumoId = parseInt(document.getElementById('saidaInsumo').value);
+            const quantidade = parseFloat(document.getElementById('saidaQuantidade').value);
+            const talhaoId = document.getElementById('saidaTalhao').value ? parseInt(document.getElementById('saidaTalhao').value) : null;
+            const observacoes = document.getElementById('saidaObservacoes').value;
+            
+            if (!data || !tipo || !insumoId || !quantidade || quantidade <= 0) {
+                showAlert('Por favor, preencha todos os campos obrigatórios.', 'warning');
+                return;
+            }
+            
+            // Verificar se há estoque suficiente
+            const estoqueItem = data.estoque.find(e => e.insumoId === insumoId);
+            const estoqueAtual = estoqueItem ? estoqueItem.quantidade : 0;
+            
+            if (quantidade > estoqueAtual) {
+                showAlert(`Estoque insuficiente. Disponível: ${estoqueAtual}`, 'warning');
+                return;
+            }
+            
+            // Verificar se talhão é obrigatório para aplicação
+            if (tipo === 'Aplicação' && !talhaoId) {
+                showAlert('Talhão é obrigatório para aplicações.', 'warning');
+                return;
+            }
+            
+            const editId = form.dataset.editId;
+            
+            if (editId) {
+                // Editar saída existente
+                const index = data.saidas.findIndex(s => s.id === parseInt(editId));
+                if (index !== -1) {
+                    const saidaAnterior = data.saidas[index];
+                    
+                    // Reverter estoque da saída anterior
+                    updateEstoque(saidaAnterior.insumoId, saidaAnterior.quantidade);
+                    
+                    // Aplicar nova saída
+                    updateEstoque(insumoId, -quantidade);
+                    
+                    // Atualizar dados da saída
+                    data.saidas[index] = {
+                        id: parseInt(editId),
+                        data: data,
+                        tipo: tipo,
+                        insumoId: insumoId,
+                        talhaoId: talhaoId,
+                        quantidade: quantidade,
+                        observacoes: observacoes
+                    };
+                    
+                    showAlert('Saída atualizada com sucesso!', 'success');
+                }
+            } else {
+                // Criar nova saída
+                const novaSaida = {
+                    id: Math.max(...data.saidas.map(s => s.id), 0) + 1,
+                    data: data,
+                    tipo: tipo,
+                    insumoId: insumoId,
+                    talhaoId: talhaoId,
+                    quantidade: quantidade,
+                    observacoes: observacoes
+                };
+                
+                data.saidas.push(novaSaida);
+                
+                // Atualizar estoque
+                updateEstoque(insumoId, -quantidade);
+                
+                showAlert('Saída registrada com sucesso!', 'success');
+            }
+            
+            // Fechar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('saidaModal'));
+            modal.hide();
+            
+            // Atualizar interface
+            updateDashboard();
+            if (currentSection === 'saidas') {
+                loadSectionContent('saidas');
+            }
+            
+            // Salvar no Google Sheets (se disponível)
+            try {
+                const saidaData = editId ? data.saidas.find(s => s.id === parseInt(editId)) : novaSaida;
+                await callWebApp('saveSaida', { saida: saidaData });
+                console.log('Saída salva no Google Sheets');
+            } catch (error) {
+                console.log('Google Apps Script não disponível - dados salvos localmente');
+                console.error('Erro ao salvar no Google Sheets:', error);
+            }
+        }
+        
+        function editSaida(id) {
+            openSaidaModal(id);
+        }
+        
+        async function deleteSaida(id) {
+            if (confirm('Tem certeza que deseja excluir esta saída?')) {
+                const index = data.saidas.findIndex(s => s.id === id);
+                if (index !== -1) {
+                    const saida = data.saidas[index];
+                    
+                    // Reverter estoque
+                    updateEstoque(saida.insumoId, saida.quantidade);
+                    
+                    // Remover saída
+                    data.saidas.splice(index, 1);
+                    
+                    showAlert('Saída excluída com sucesso!', 'success');
+                    
+                    // Atualizar interface
+                    updateDashboard();
+                    if (currentSection === 'saidas') {
+                        loadSectionContent('saidas');
+                    }
+                    
+                    // Excluir do Google Sheets (se disponível)
+                    try {
+                        await callWebApp('deleteSaida', { id: id });
+                        console.log('Saída excluída no Google Sheets');
+                    } catch (error) {
+                        console.log('Google Apps Script não disponível - dados excluídos localmente');
+                        console.error('Erro ao excluir no Google Sheets:', error);
+                    }
+                }
+            }
+        }
+        
+        // Função para carregar tabela de insumos
+        function loadInsumosTable() {
+            const tbody = document.getElementById('insumosTableBody');
+            if (tbody) {
+                tbody.innerHTML = data.insumos.map(insumo => {
+                    const estoqueItem = data.estoque.find(e => e.insumoId === insumo.id);
+                    const estoqueAtual = estoqueItem ? estoqueItem.quantidade : 0;
+                    const statusClass = estoqueAtual <= insumo.estoqueMinimo ? 'text-danger' : 'text-success';
+                    
+                    return `
+                        <tr>
+                            <td>${insumo.id}</td>
+                            <td>${insumo.nome}</td>
+                            <td><span class="badge bg-secondary">${insumo.categoria}</span></td>
+                            <td>${insumo.unidade}</td>
+                            <td>${insumo.estoqueMinimo}</td>
+                            <td class="${statusClass}">${estoqueAtual}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning me-1" onclick="editInsumo(${insumo.id})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteInsumo(${insumo.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+        
+        // Função para carregar tabela de fornecedores
+        function loadFornecedoresTable() {
+            const tbody = document.getElementById('fornecedoresTableBody');
+            if (tbody) {
+                tbody.innerHTML = data.fornecedores.map(fornecedor => {
+                    return `
+                        <tr>
+                            <td>${fornecedor.id}</td>
+                            <td>${fornecedor.nome}</td>
+                            <td>${fornecedor.contato}</td>
+                            <td>${fornecedor.email}</td>
+                            <td>${fornecedor.endereco || '-'}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning me-1" onclick="editFornecedor(${fornecedor.id})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteFornecedor(${fornecedor.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+        
+        // Função para carregar tabela de talhões
+        function loadTalhoesTable() {
+            const tbody = document.getElementById('talhoesTableBody');
+            if (tbody) {
+                tbody.innerHTML = data.talhoes.map(talhao => {
+                    return `
+                        <tr>
+                            <td>${talhao.id}</td>
+                            <td>${talhao.nome}</td>
+                            <td>${talhao.area} ha</td>
+                            <td><span class="badge bg-info">${talhao.cultura}</span></td>
+                            <td>${talhao.observacoes || '-'}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning me-1" onclick="editTalhao(${talhao.id})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteTalhao(${talhao.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+        
+        // Função para carregar tabela de entradas
+        function loadEntradasTable() {
+            const tbody = document.getElementById('entradasTableBody');
+            if (tbody) {
+                tbody.innerHTML = data.entradas.map(entrada => {
+                    const insumoNome = getInsumoNome(entrada.insumoId);
+                    const fornecedorNome = entrada.fornecedorId ? getFornecedorNome(entrada.fornecedorId) : '-';
+                    const valorTotal = entrada.valorTotal ? `R$ ${entrada.valorTotal.toFixed(2)}` : '-';
+                    
+                    return `
+                        <tr>
+                            <td>${entrada.id}</td>
+                            <td>${new Date(entrada.data).toLocaleDateString('pt-BR')}</td>
+                            <td><span class="badge bg-success">${entrada.tipo}</span></td>
+                            <td>${insumoNome}</td>
+                            <td>${fornecedorNome}</td>
+                            <td>${entrada.quantidade}</td>
+                            <td>${valorTotal}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning me-1" onclick="editEntrada(${entrada.id})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteEntrada(${entrada.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+        
+        // Função para carregar tabela de saídas
+        function loadSaidasTable() {
+            const tbody = document.getElementById('saidasTableBody');
+            if (tbody) {
+                tbody.innerHTML = data.saidas.map(saida => {
+                    const insumoNome = getInsumoNome(saida.insumoId);
+                    const talhaoNome = saida.talhaoId ? getTalhaoNome(saida.talhaoId) : '-';
+                    
+                    return `
+                        <tr>
+                            <td>${saida.id}</td>
+                            <td>${new Date(saida.data).toLocaleDateString('pt-BR')}</td>
+                            <td><span class="badge bg-danger">${saida.tipo}</span></td>
+                            <td>${insumoNome}</td>
+                            <td>${talhaoNome}</td>
+                            <td>${saida.quantidade}</td>
+                            <td>${saida.observacoes || '-'}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning me-1" onclick="editSaida(${saida.id})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteSaida(${saida.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+        
+        // Função para carregar tabela de estoque
+        function loadEstoqueTable() {
+            const tbody = document.getElementById('estoqueTableBody');
+            if (tbody) {
+                tbody.innerHTML = data.estoque.map(item => {
+                    const insumo = data.insumos.find(i => i.id === item.insumoId);
+                    if (!insumo) return '';
+                    
+                    const statusClass = item.quantidade <= insumo.estoqueMinimo ? 'table-danger' : 'table-success';
+                    const statusText = item.quantidade <= insumo.estoqueMinimo ? 'Baixo' : 'Normal';
+                    const statusBadge = item.quantidade <= insumo.estoqueMinimo ? 'bg-danger' : 'bg-success';
+                    
+                    return `
+                        <tr class="${statusClass}">
+                            <td>${item.id}</td>
+                            <td>${insumo.nome}</td>
+                            <td><span class="badge bg-secondary">${insumo.categoria}</span></td>
+                            <td>${insumo.unidade}</td>
+                            <td>${item.quantidade}</td>
+                            <td>${insumo.estoqueMinimo}</td>
+                            <td><span class="badge ${statusBadge}">${statusText}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+        
+        // Função para verificar estoque baixo
+        function checkLowStock() {
+            const lowStockItems = [];
+            
+            data.estoque.forEach(item => {
+                const insumo = data.insumos.find(i => i.id === item.insumoId);
+                if (insumo && item.quantidade <= insumo.estoqueMinimo) {
+                    lowStockItems.push({
+                        insumo: insumo.nome,
+                        atual: item.quantidade,
+                        minimo: insumo.estoqueMinimo
+                    });
+                }
+            });
+            
+            return lowStockItems;
+        }
+        
+        // Função para mostrar alertas de estoque baixo
+        function showLowStockAlerts() {
+            const lowStockItems = checkLowStock();
+            
+            if (lowStockItems.length > 0) {
+                const alertContainer = document.getElementById('alertContainer');
+                if (alertContainer) {
+                    const alertHtml = `
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <h6><i class="fas fa-exclamation-triangle"></i> Alerta de Estoque Baixo</h6>
+                            <ul class="mb-0">
+                                ${lowStockItems.map(item => 
+                                    `<li>${item.insumo}: ${item.atual} (mínimo: ${item.minimo})</li>`
+                                ).join('')}
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `;
+                    alertContainer.innerHTML = alertHtml;
+                }
+            }
+        }
+        
+        // Função para atualizar dashboard com informações em tempo real
+        function updateDashboard() {
+            // Atualizar contadores
+            document.getElementById('totalInsumos').textContent = data.insumos.length;
+            document.getElementById('totalFornecedores').textContent = data.fornecedores.length;
+            document.getElementById('totalTalhoes').textContent = data.talhoes.length;
+            document.getElementById('totalEstoque').textContent = data.estoque.length;
+            
+            // Atualizar seção de estoque baixo no dashboard
+            updateEstoqueBaixoSection();
+            
+            // Atualizar últimas movimentações
+            updateUltimasMovimentacoes();
+            
+            // Verificar e mostrar alertas de estoque baixo
+            showLowStockAlerts();
+        }
+        
+        // Função para atualizar seção de estoque baixo
+        function updateEstoqueBaixoSection() {
+            const lowStockItems = checkLowStock();
+            const container = document.getElementById('estoqueBaixo');
+            
+            if (lowStockItems.length === 0) {
+                container.innerHTML = '<p class="text-success mb-0"><i class="fas fa-check-circle me-2"></i>Todos os itens estão com estoque adequado</p>';
+            } else {
+                const html = lowStockItems.map(item => 
+                    `<div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-danger">${item.insumo}</span>
+                        <span class="badge bg-danger">${item.atual}/${item.minimo}</span>
+                    </div>`
+                ).join('');
+                container.innerHTML = html;
+            }
+        }
+        
+        // Função para atualizar últimas movimentações
+        function updateUltimasMovimentacoes() {
+            const container = document.getElementById('ultimasMovimentacoes');
+            
+            // Combinar entradas e saídas e ordenar por data
+            const movimentacoes = [];
+            
+            data.entradas.forEach(entrada => {
+                movimentacoes.push({
+                    data: entrada.data,
+                    tipo: 'entrada',
+                    insumo: getInsumoNome(entrada.insumoId),
+                    quantidade: entrada.quantidade,
+                    icon: 'fas fa-plus-circle text-success'
+                });
+            });
+            
+            data.saidas.forEach(saida => {
+                movimentacoes.push({
+                    data: saida.data,
+                    tipo: 'saida',
+                    insumo: getInsumoNome(saida.insumoId),
+                    quantidade: saida.quantidade,
+                    icon: 'fas fa-minus-circle text-danger'
+                });
+            });
+            
+            // Ordenar por data (mais recentes primeiro) e pegar apenas as 5 últimas
+            movimentacoes.sort((a, b) => new Date(b.data) - new Date(a.data));
+            const ultimasMovimentacoes = movimentacoes.slice(0, 5);
+            
+            if (ultimasMovimentacoes.length === 0) {
+                container.innerHTML = '<p class="text-muted mb-0">Nenhuma movimentação registrada</p>';
+            } else {
+                const html = ultimasMovimentacoes.map(mov => 
+                    `<div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <i class="${mov.icon} me-2"></i>
+                            <span>${mov.insumo}</span>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted d-block">${new Date(mov.data).toLocaleDateString('pt-BR')}</small>
+                            <span class="badge ${mov.tipo === 'entrada' ? 'bg-success' : 'bg-danger'}">${mov.quantidade}</span>
+                        </div>
+                    </div>`
+                ).join('');
+                container.innerHTML = html;
+            }
+        }
+    </script>
+</body>
+</html>
